@@ -17,6 +17,7 @@ States are bitmasks of the alphabets that are still *accepted* from that state.
 from __future__ import annotations
 
 import re
+import textwrap
 import xml.etree.ElementTree as etree
 
 from markdown import Extension
@@ -560,7 +561,14 @@ class MultimdTableProcessor(BlockProcessor):
     def _fill_multiline_cell(
         self, cell_el: etree.Element, c: int, tr_data: dict
     ) -> None:
-        """Parse multi-line cell content as block Markdown into *cell_el*."""
+        """Parse multi-line cell content as block Markdown into *cell_el*.
+
+        Cell lines are dedented (common leading whitespace stripped) so that
+        alignment padding between column pipes is transparent to block-level
+        parsers.  The preprocessor pipeline is then run on the dedented lines
+        before block processing, which allows preprocessor-based extensions
+        (fenced code blocks, admonitions, …) to work inside multiline cells.
+        """
         cell_lines: list[str] = []
 
         for mline, mbounds_b in zip(tr_data["mlines"], tr_data["mbounds"]):
@@ -577,7 +585,10 @@ class MultimdTableProcessor(BlockProcessor):
             if cell_attrs:
                 _apply_attrs(cell_attrs, cell_el)
 
-        self.parser.parseChunk(cell_el, "\n".join(cell_lines))
+        lines = textwrap.dedent("\n".join(cell_lines)).split("\n")
+        for prep in self.parser.md.preprocessors:
+            lines = prep.run(lines)
+        self.parser.parseChunk(cell_el, "\n".join(lines))
 
     # ------------------------------------------------------------------
     # Helpers
