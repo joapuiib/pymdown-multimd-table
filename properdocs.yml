@@ -1,0 +1,66 @@
+site_name: pymdown-multimd-table
+site_description: Python-Markdown extension implementing MultiMarkdown 6 extended table syntax
+site_url: https://joapuiib.github.io/pymdown-multimd-table
+repo_url: https://github.com/joapuiib/pymdown-multimd-table
+repo_name: joapuiib/pymdown-multimd-table
+
+theme:
+  name: materialx
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - Syntax:
+    - Basic Table: syntax/basic.md
+    - Text Alignment: syntax/alignment.md
+    - Column Spanning: syntax/colspan.md
+    - Multiple Headers: syntax/multiple-headers.md
+    - Table Captions: syntax/captions.md
+    - Multiple Bodies: syntax/multibody.md
+    - Wrappable Columns: syntax/wrappable.md
+    - Inline Formatting: syntax/inline-formatting.md
+    - Row Spanning: syntax/rowspan.md
+    - Multiline Cells: syntax/multiline.md
+    - Headerless Tables: syntax/headerless.md
+    - Attribute Lists: syntax/attr-list.md
+
+markdown_extensions:
+  - pymdown_multimd_table:
+      rowspan: true
+      multiline: true
+      headerless: true
+      multibody: true
+      autolabel: true
+      attr_list: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.blocks.html
+  - admonition
+  - def_list
+  - attr_list
+  - md_in_html
