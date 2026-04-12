@@ -10,6 +10,7 @@ DFA alphabet constants (encoded as powers-of-16 for precedence ordering):
   HDR = 0x00100  header row
   DAT = 0x00010  data row
   EMP = 0x00001  empty line
+  TBA = 0x00002  standalone {…} attribute line (tbody- or table-level)
 
 States are bitmasks of the alphabets that are still *accepted* from that state.
 """
@@ -17,6 +18,7 @@ States are bitmasks of the alphabets that are still *accepted* from that state.
 from __future__ import annotations
 
 import re
+import textwrap
 import xml.etree.ElementTree as etree
 
 from markdown import Extension
@@ -35,10 +37,12 @@ SEP = 0x01000
 HDR = 0x00100
 DAT = 0x00010
 EMP = 0x00001
+TBA = 0x00002  # standalone {…} attribute line (tbody- or table-level)
 
 _SEP_RE = re.compile(r"^:?(-+|=+):?\+?$")
 _CAP_RE = re.compile(r"^\[(.+?)\](\[([^\[\]]+)\])?\s*$")
 _ATTR_RE = re.compile(r"\s*\{([^}\n]*)\}\s*$")
+_STANDALONE_ATTR_RE = re.compile(r"^\s*\{([^}\n]*)\}\s*$")
 
 
 # ---------------------------------------------------------------------------
@@ -342,7 +346,7 @@ class MultimdTableProcessor(BlockProcessor):
         *state*, or ``0`` when no alphabet matches.
         """
         opts = self.config
-        for alph in (CAP, SEP, HDR, DAT, EMP):
+        for alph in (CAP, SEP, HDR, DAT, EMP, TBA):
             if not (state & alph):
                 continue
             if alph == CAP:
@@ -357,6 +361,9 @@ class MultimdTableProcessor(BlockProcessor):
             elif alph == EMP:
                 if not line.strip():
                     return EMP
+            elif alph == TBA:
+                if opts["attr_list"] and _STANDALONE_ATTR_RE.match(line):
+                    return TBA
         return 0
 
     def _execute_dfa(self, lines: list[str]) -> dict | None:
@@ -372,8 +379,9 @@ class MultimdTableProcessor(BlockProcessor):
             0x10100: {CAP: 0x00100, HDR: 0x01100},
             0x00100: {HDR: 0x01100},
             0x01100: {SEP: 0x10010, HDR: 0x01100},
-            0x10010: {CAP: 0x00000, DAT: 0x10011},
-            0x10011: {CAP: 0x00000, DAT: 0x10011, EMP: 0x10010},
+            0x10010: {CAP: 0x00000, DAT: 0x10013},
+            # 0x10013 = CAP | DAT | EMP | TBA: state after a data row.
+            0x10013: {CAP: 0x00000, DAT: 0x10013, EMP: 0x10010, TBA: 0x10013},
         }
         initial = 0x10100
 
@@ -381,21 +389,20 @@ class MultimdTableProcessor(BlockProcessor):
             initial = 0x11100
             transitions[0x11100] = {CAP: 0x01100, SEP: 0x10010, HDR: 0x01100}
 
-        if not opts["multibody"]:
-            transitions[0x10010] = {CAP: 0x00000, DAT: 0x10010}
+        accept = {0x10010, 0x10013, 0x00000}
 
-        accept = {0x10010, 0x10011, 0x00000}
-
-        meta: dict = {"sep": None, "cap": None, "tr": []}
+        meta: dict = {"sep": None, "cap": None, "tr": [], "table_attrs": None}
         grp = 0x10
         mtr = -1
         tr_token: dict | None = None
         state = initial
+        last_alph = 0
 
         for i, line in enumerate(lines):
             alph = self._match_alphabet(state, line)
             if alph == 0:
                 break
+            last_alph = alph
 
             # --- Actions ---------------------------------------------------
             if alph == CAP:
@@ -449,6 +456,19 @@ class MultimdTableProcessor(BlockProcessor):
                     tr_token["grp"] |= 0x01
                 grp = 0x10
 
+            elif alph == TBA:
+                m = _STANDALONE_ATTR_RE.match(line)
+                attrs = m.group(1) if m else None
+                if tr_token is not None:
+                    if tr_token.get("tbody_attrs") is not None:
+                        # A second consecutive TBA: the first is the tbody attr
+                        # (already set), this one is the table attr.
+                        meta["table_attrs"] = attrs
+                    else:
+                        tr_token["tbody_attrs"] = attrs
+                        tr_token["grp"] |= 0x01
+                grp = 0x10
+
             # --- Transition ------------------------------------------------
             state = transitions.get(state, {}).get(alph, 0)
 
@@ -456,6 +476,13 @@ class MultimdTableProcessor(BlockProcessor):
             return None
         if not meta["tr"]:
             return None
+
+        # A TBA line as the very last action (not followed by EMP or more rows)
+        # is a table-level attribute, not a tbody-level one — unless table_attrs
+        # was already set by a second consecutive TBA.
+        if last_alph == TBA and meta["tr"] and meta["table_attrs"] is None:
+            last_tr = meta["tr"][-1]
+            meta["table_attrs"] = last_tr.pop("tbody_attrs", None)
 
         # The last row always closes its group.
         meta["tr"][-1]["grp"] |= 0x01
@@ -494,6 +521,12 @@ class MultimdTableProcessor(BlockProcessor):
             if tr_data.get("row_attrs"):
                 _apply_attrs(tr_data["row_attrs"], tr_el)
             self._fill_row(tr_el, tr_data, sep, up_tokens)
+
+            if tr_data.get("tbody_attrs") and tgroup is not None:
+                _apply_attrs(tr_data["tbody_attrs"], tgroup)
+
+        if meta.get("table_attrs"):
+            _apply_attrs(meta["table_attrs"], table)
 
         return table
 
@@ -560,7 +593,14 @@ class MultimdTableProcessor(BlockProcessor):
     def _fill_multiline_cell(
         self, cell_el: etree.Element, c: int, tr_data: dict
     ) -> None:
-        """Parse multi-line cell content as block Markdown into *cell_el*."""
+        """Parse multi-line cell content as block Markdown into *cell_el*.
+
+        Cell lines are dedented (common leading whitespace stripped) so that
+        alignment padding between column pipes is transparent to block-level
+        parsers.  The preprocessor pipeline is then run on the dedented lines
+        before block processing, which allows preprocessor-based extensions
+        (fenced code blocks, admonitions, …) to work inside multiline cells.
+        """
         cell_lines: list[str] = []
 
         for mline, mbounds_b in zip(tr_data["mlines"], tr_data["mbounds"]):
@@ -577,7 +617,10 @@ class MultimdTableProcessor(BlockProcessor):
             if cell_attrs:
                 _apply_attrs(cell_attrs, cell_el)
 
-        self.parser.parseChunk(cell_el, "\n".join(cell_lines))
+        lines = textwrap.dedent("\n".join(cell_lines)).split("\n")
+        for prep in self.parser.md.preprocessors:
+            lines = prep.run(lines)
+        self.parser.parseChunk(cell_el, "\n".join(lines))
 
     # ------------------------------------------------------------------
     # Helpers

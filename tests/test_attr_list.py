@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from tests.conftest import assert_html
+from tests.conftest import assert_html, convert
 
 
 class TestAttrList:
@@ -394,4 +394,202 @@ class TestAttrList:
             '<tbody><tr class="myrow"><td class="myclass">cell</td></tr></tbody></table>',
             extensions=['pymdown_multimd_table', 'attr_list'],
             attr_list=True,
+        )
+
+    # ------------------------------------------------------------------
+    # Table-level attributes
+    # ------------------------------------------------------------------
+
+    def test_table_attrs_class(self):
+        '''A standalone {…} on the last line is applied to the <table> element.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| cell |\n'
+            '{.mytable}'
+        )
+        assert_html(
+            src,
+            '<table class="mytable"><thead><tr><th>H</th></tr></thead>'
+            '<tbody><tr><td>cell</td></tr></tbody></table>',
+            attr_list=True,
+        )
+
+    def test_table_attrs_id(self):
+        '''A standalone {#id} on the last line sets id on the <table>.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| cell |\n'
+            '{#mytable}'
+        )
+        assert_html(
+            src,
+            '<table id="mytable"><thead><tr><th>H</th></tr></thead>'
+            '<tbody><tr><td>cell</td></tr></tbody></table>',
+            attr_list=True,
+        )
+
+    def test_table_attrs_multiple(self):
+        '''Multiple attributes on the table.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| cell |\n'
+            '{#mytable .myclass data-x=y}'
+        )
+        assert_html(
+            src,
+            '<table class="myclass" data-x="y" id="mytable"><thead><tr><th>H</th></tr></thead>'
+            '<tbody><tr><td>cell</td></tr></tbody></table>',
+            attr_list=True,
+        )
+
+    def test_table_attrs_ignored_when_disabled(self):
+        '''Standalone {…} on the last line is NOT consumed as attrs when attr_list=False.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| cell |\n'
+            '{.mytable}'
+        )
+        # With attr_list disabled the line is not part of the table block; the
+        # table ends before it, so it should be rendered as a paragraph.
+        result = convert(src)
+        assert '<table class="mytable">' not in result
+
+    # ------------------------------------------------------------------
+    # Tbody-level attributes
+    # ------------------------------------------------------------------
+
+    def test_tbody_attrs_class(self):
+        '''A standalone {…} line after a tbody closes the tbody and applies attrs to it.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{.mybody}\n'
+            '\n'
+            '| row2 |'
+        )
+        assert_html(
+            src,
+            '<table><thead><tr><th>H</th></tr></thead>'
+            '<tbody class="mybody"><tr><td>row1</td></tr></tbody>'
+            '<tbody><tr><td>row2</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
+        )
+
+    def test_tbody_attrs_id(self):
+        '''A standalone {#id} applies an id to the preceding tbody.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{#first}\n'
+            '\n'
+            '| row2 |'
+        )
+        assert_html(
+            src,
+            '<table><thead><tr><th>H</th></tr></thead>'
+            '<tbody id="first"><tr><td>row1</td></tr></tbody>'
+            '<tbody><tr><td>row2</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
+        )
+
+    def test_tbody_attrs_multiple(self):
+        '''Multiple attributes on a tbody.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{#first .mybody data-x=y}\n'
+            '\n'
+            '| row2 |'
+        )
+        assert_html(
+            src,
+            '<table><thead><tr><th>H</th></tr></thead>'
+            '<tbody class="mybody" data-x="y" id="first"><tr><td>row1</td></tr></tbody>'
+            '<tbody><tr><td>row2</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
+        )
+
+    def test_tbody_attrs_all_bodies(self):
+        '''The last {…} becomes a table attr; earlier {…} before blank lines are tbody attrs.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{.first}\n'
+            '\n'
+            '| row2 |\n'
+            '{.second}'
+        )
+        # {.first} is before a blank line → tbody attr for the first tbody.
+        # {.second} is the very last line (no blank line after) → table attr.
+        assert_html(
+            src,
+            '<table class="second"><thead><tr><th>H</th></tr></thead>'
+            '<tbody class="first"><tr><td>row1</td></tr></tbody>'
+            '<tbody><tr><td>row2</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
+        )
+
+    def test_tbody_attrs_ignored_when_disabled(self):
+        '''Standalone {…} before blank line is treated as a new tbody separator row (invalid) when attr_list=False, so the block is not consumed.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{.mybody}\n'
+            '\n'
+            '| row2 |'
+        )
+        # Without attr_list the {…} line breaks multibody detection; the table
+        # ends at row1 and the remaining lines become separate blocks.
+        result = convert(src, multibody=True)
+        assert '<tbody class="mybody">' not in result
+
+    def test_tbody_and_table_attrs_combined(self):
+        '''Two consecutive {…} at the end: first = tbody attr, second = table attr.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row |\n'
+            '{.last-tbody}\n'
+            '{.whole-table}'
+        )
+        assert_html(
+            src,
+            '<table class="whole-table"><thead><tr><th>H</th></tr></thead>'
+            '<tbody class="last-tbody"><tr><td>row</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
+        )
+
+    def test_tbody_and_table_attrs_combined_multibody(self):
+        '''First tbody attr (before blank), second tbody attr + table attr at end.'''
+        src = (
+            '| H |\n'
+            '| - |\n'
+            '| row1 |\n'
+            '{.first}\n'
+            '\n'
+            '| row2 |\n'
+            '{.second}\n'
+            '{.mytable}'
+        )
+        assert_html(
+            src,
+            '<table class="mytable"><thead><tr><th>H</th></tr></thead>'
+            '<tbody class="first"><tr><td>row1</td></tr></tbody>'
+            '<tbody class="second"><tr><td>row2</td></tr></tbody></table>',
+            attr_list=True,
+            multibody=True,
         )
