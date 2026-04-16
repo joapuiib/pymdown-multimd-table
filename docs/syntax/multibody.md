@@ -6,7 +6,7 @@ grouping rows.
 
 ## Basic example
 
-```
+[[% set example_1 %]]
 | Category  | Item    | Price  |
 | :-------- | :------ | -----: |
 | Fruit     | Apple   | $0.50  |
@@ -14,21 +14,12 @@ grouping rows.
 
 | Vegetable | Carrot  | $0.80  |
 | Vegetable | Onion   | $0.60  |
-```
-
-<div class="result" markdown="1">
-| Category  | Item    | Price  |
-| :-------- | :------ | -----: |
-| Fruit     | Apple   | $0.50  |
-| Fruit     | Banana  | $0.30  |
-
-| Vegetable | Carrot  | $0.80  |
-| Vegetable | Onion   | $0.60  |
-</div>
+[[% endset %]]
+[[ table_example(example_1) ]]
 
 ## Three sections
 
-```
+[[% set example_2 %]]
 | H |
 | - |
 | Section 1 row A |
@@ -39,20 +30,8 @@ grouping rows.
 | Section 3 row A |
 | Section 3 row B |
 | Section 3 row C |
-```
-
-<div class="result" markdown="1">
-| H |
-| - |
-| Section 1 row A |
-| Section 1 row B |
-
-| Section 2 row A |
-
-| Section 3 row A |
-| Section 3 row B |
-| Section 3 row C |
-</div>
+[[% endset %]]
+[[ table_example(example_2) ]]
 
 ## Disabling multibody
 

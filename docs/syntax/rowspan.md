@@ -14,41 +14,28 @@ Consecutive `^^` markers keep extending the rowspan.
 
 ## Simple rowspan
 
-```
+[[% set example_1 %]]
 | A      | B  | C  |
 | :----- | :- | :- |
 | tall   | 1  | x  |
 | ^^     | 2  | y  |
-```
-
-/// html | div.result
-| A      | B  | C  |
-| :----- | :- | :- |
-| tall   | 1  | x  |
-| ^^     | 2  | y  |
-///
+[[% endset %]]
+[[ table_example(example_1) ]]
 
 ## Three-row span
 
-```
+[[% set example_2 %]]
 | A      | B  |
 | :----- | :- |
 | big    | 1  |
 | ^^     | 2  |
 | ^^     | 3  |
-```
-
-/// html | div.result
-| A      | B  |
-| :----- | :- |
-| big    | 1  |
-| ^^     | 2  |
-| ^^     | 3  |
-///
+[[% endset %]]
+[[ table_example(example_2) ]]
 
 ## Rowspan and colspan combined
 
-```
+[[% set example_3 %]]
 | A ||  |
 | --- | --- | --- |
 | B  | C  | D  |
@@ -56,17 +43,8 @@ Consecutive `^^` markers keep extending the rowspan.
 | G  || H  |
 | ^^ || I  |
 | ^^ || J  |
-```
-
-/// html | div.result
-| A ||  |
-| --- | --- | --- |
-| B  | C  | D  |
-| ^^ | E  | F  |
-| G  || H  |
-| ^^ || I  |
-| ^^ || J  |
-///
+[[% endset %]]
+[[ table_example(example_3) ]]
 
 ## Notes
 

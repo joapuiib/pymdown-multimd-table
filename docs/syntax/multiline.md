@@ -15,143 +15,92 @@ Markdown.
 
 ## Basic multiline
 
-```
+[[% set example_1 %]]
 | Code           | Output   |
 | :------------- | :------- |
 | line1          | x       \
 | line2          | y       \
 | line3          | z        |
-```
-
-/// html | div.result
-| Code           | Output   |
-| :------------- | :------- |
-| line1          | x       \
-| line2          | y       \
-| line3          | z        |
-///
+[[% endset %]]
+[[ table_example(example_1) ]]
 
 ## Fenced code block inside a cell
 
 Use the `fenced_code` extension alongside `multiline` to embed code blocks:
 
-```
+[[% set example_2 %]]
 | Code                    | Result  |
 | :---------------------- | :------ |
 | ``` python             | hello  |\
 | print("hello")         |        |\
 | ```                    |         |
-```
-
-/// html | div.result
-| Code                    | Result  |
-| :---------------------- | :------ |
-| ``` python             | hello  |\
-| print("hello")         |        |\
-| ```                    |         |
-///
+[[% endset %]]
+[[ table_example(example_2) ]]
 
 ## Bulleted list inside a cell
 
-```
+[[% set example_3 %]]
 | Steps                   |
 | :---------------------- |
 | - Install dependencies |\
 | - Run `mkdocs serve`   |\
 | - Open your browser     |
-```
-
-/// html | div.result
-| Steps                   |
-| :---------------------- |
-| - Install dependencies |\
-| - Run `mkdocs serve`   |\
-| - Open your browser     |
-///
+[[% endset %]]
+[[ table_example(example_3) ]]
 
 ## Nested list inside a cell
 
 Relative indentation is preserved, so nested lists work correctly:
 
-```
+[[% set example_4 %]]
 | Menu                    |
 | :---------------------- |
 | - Fruit                |\
 |     - Apple            |\
 |     - Banana           |\
 | - Vegetable             |
-```
-
-/// html | div.result
-| Menu                    |
-| :---------------------- |
-| - Fruit                |\
-|     - Apple            |\
-|     - Banana           |\
-| - Vegetable             |
-///
+[[% endset %]]
+[[ table_example(example_4) ]]
 
 ## Blockquote inside a cell
 
-```
+[[% set example_5 %]]
 | Quote                    | Author      |
 | :----------------------- | :---------- |
 | > To be, or not to be,  | Shakespeare |\
 | > that is the question. |             |
-```
-
-/// html | div.result
-| Quote                    | Author      |
-| :----------------------- | :---------- |
-| > To be, or not to be,  | Shakespeare |\
-| > that is the question. |             |
-///
+[[% endset %]]
+[[ table_example(example_5) ]]
 
 ## Admonition inside a cell
 
 Requires the [`admonition`](https://python-markdown.github.io/extensions/admonition/)
 extension.
 
-```
+[[% set example_6 %]]
 | Feature       | Notes                        |
 | :------------ | :--------------------------- |
 | Admonitions   | !!! note                    |\
 |               |     Works inside a cell!     |
 | Custom title  | !!! warning "Heads up"      |\
 |               |     Check your config.       |
-```
-
-/// html | div.result
-| Feature       | Notes                        |
-| :------------ | :--------------------------- |
-| Admonitions   | !!! note                    |\
-|               |     Works inside a cell!     |
-| Custom title  | !!! warning "Heads up"      |\
-|               |     Check your config.       |
-///
+[[% endset %]]
+[[ table_example(example_6) ]]
 
 ## Definition list inside a cell
 
 Requires the [`def_list`](https://python-markdown.github.io/extensions/definition_lists/)
 extension.
 
-```
+[[% set example_7 %]]
 | Term          | Definition                   |
 | :------------ | :--------------------------- |
 | Apple         | Apple                       |\
 |               | :   A sweet fruit            |
 | Python        | Python                      |\
 |               | :   A programming language   |
-```
-
-/// html | div.result
-| Term          | Definition                   |
-| :------------ | :--------------------------- |
-| Apple         | Apple                       |\
-|               | :   A sweet fruit            |
-| Python        | Python                      |\
-|               | :   A programming language   |
-///
+[[% endset %]]
+[[ table_example(example_7) ]]
 
 ## Notes
 
