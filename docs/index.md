@@ -30,18 +30,11 @@ mirroring the feature set of the [`markdown-it-multimd-table`](https://github.co
 
 ## Quick example
 
-```
+[[% set example_1 %]]
 |              | Grouping      ||
 | Header       | A             | B             |
 | :----------- | :-----------: | ------------: |
 | Row 1        | spans         ||
 | Row 2        | left          | right         |
-```
-
-/// html | div.result
-|              | Grouping      ||
-| Header       | A             | B             |
-| :----------- | :-----------: | ------------: |
-| Row 1        | spans         ||
-| Row 2        | left          | right         |
-///
+[[% endset %]]
+[[ table_example(example_1) ]]

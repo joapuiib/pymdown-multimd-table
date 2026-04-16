@@ -14,49 +14,33 @@ above it). The table has only a `<tbody>` element — no `<thead>`.
 
 ## Basic headerless table
 
-```
+[[% set example_1 %]]
 | --- | --- |
 | No header | here |
 | Another   | row  |
-```
-
-/// html | div.result
-| --- | --- |
-| No header | here |
-| Another   | row  |
-///
+[[% endset %]]
+[[ table_example(example_1) ]]
 
 ## With alignment
 
 Alignment colons work in the separator row just as in regular tables:
 
-```
+[[% set example_2 %]]
 | :------- | ---: |
 | Left     |  100 |
 | Aligned  |   42 |
-```
-
-/// html | div.result
-| :------- | ---: |
-| Left     |  100 |
-| Aligned  |   42 |
-///
+[[% endset %]]
+[[ table_example(example_2) ]]
 
 ## With a caption
 
-```
+[[% set example_3 %]]
 [Product List]
 | --- | --- | --- |
 | Widget | blue | $9.99 |
 | Gadget | red  | $4.99 |
-```
-
-/// html | div.result
-[Product List]
-| --- | --- | --- |
-| Widget | blue | $9.99 |
-| Gadget | red  | $4.99 |
-///
+[[% endset %]]
+[[ table_example(example_3) ]]
 
 ## Notes
 

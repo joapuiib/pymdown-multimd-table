@@ -12,68 +12,44 @@ Each additional `|` adds one more column to the span:
 
 ## Colspan in the header
 
-```
+[[% set example_1 %]]
 |            | Grouping  ||
 | Header     | A         | B         |
 | ---------- | :-------: | --------: |
 | Data       | 1         | 2         |
-```
-
-/// html | div.result
-|            | Grouping  ||
-| Header     | A         | B         |
-| ---------- | :-------: | --------: |
-| Data       | 1         | 2         |
-///
+[[% endset %]]
+[[ table_example(example_1) ]]
 
 ## Colspan in the body
 
-```
+[[% set example_2 %]]
 | A | B | C |
 | - | - | - |
 | spans   |||
 | 1 | 2 | 3 |
-```
-
-/// html | div.result
-| A | B | C |
-| - | - | - |
-| spans   |||
-| 1 | 2 | 3 |
-///
+[[% endset %]]
+[[ table_example(example_2) ]]
 
 ## Colspan combined with alignment
 
 The alignment of the **leftmost** spanned column is applied to the merged cell.
 
-```
+[[% set example_3 %]]
 |              | Grouping      ||
 | Header       | A             | B             |
 | :----------- | :-----------: | ------------: |
 | Row 1        | spans (centre)||
 | Row 2        | centre        | right         |
-```
-
-/// html | div.result
-|              | Grouping      ||
-| Header       | A             | B             |
-| :----------- | :-----------: | ------------: |
-| Row 1        | spans (centre)||
-| Row 2        | centre        | right         |
-///
+[[% endset %]]
+[[ table_example(example_3) ]]
 
 !!! warning "Empty vs. whitespace"
     Only a **strictly empty** cell slice (no characters at all) triggers colspan.
     A cell containing only spaces is a regular empty-content cell.
 
-    ```
+    [[% set example_4 %]]
     | A  | B  |
     | -  | -  |
     | 1  |    |
-    ```
-
-    /// html | div.result
-    | A  | B  |
-    | -  | -  |
-    | 1  |    |
-    ///
+    [[% endset %]]
+    [[ table_example(example_4) | indent(width=4, first=True, blank=True) ]]

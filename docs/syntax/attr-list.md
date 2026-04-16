@@ -81,97 +81,53 @@ the most useful token is usually `.class`, but `#id` and `key="value"` work too.
 
 Put the attribute block inside the cell. The class lands on the rendered `<td>`.
 
-```markdown
+[[% set example_1 %]]
 | Item | Price |
 | :--- | ----: |
 | Notebook {.featured} | $12 |
 | Pencil | $2 {#sale-price} |
-```
+[[% endset %]]
+[[ table_example(example_1, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Item | Price |
-| :--- | ----: |
-| Notebook {.featured} | $12 |
-| Pencil | $2 {#sale-price} |
-</div>
-
-```html
-<td class="featured">Notebook</td>
-<td id="sale-price">$2</td>
-```
 
 ## Style header cells
 
 The same syntax works in the header row, so the attributes land on `<th>`.
 
-```markdown
+[[% set example_2 %]]
 | Plan {.featured} | Seats |
 | :------------------- | ----: |
 | Starter | 3 |
 | Pro | 10 |
-```
+[[% endset %]]
+[[ table_example(example_2, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Plan {.featured} | Seats |
-| :------------------- | ----: |
-| Starter | 3 |
-| Pro | 10 |
-</div>
-
-```html
-<th class="featured">Plan</th>
-```
 
 ## Style a full row
 
 Put the attribute block after the last pipe. The class is applied to the `<tr>`,
 so every cell in that row picks up the styling.
 
-```markdown
+[[% set example_3 %]]
 | Plan | Price |
 | :--- | ----: |
 | Starter | $9 |
 | Pro | $29 |{.featured-row}
-```
+[[% endset %]]
+[[ table_example(example_3, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Plan | Price |
-| :--- | ----: |
-| Starter | $9 |
-| Pro | $29 |{.featured-row}
-</div>
-
-```html
-<tr class="featured-row">
-  <td>Pro</td>
-  <td>$29</td>
-</tr>
-```
 
 ## Style a header row
 
 Row attributes also work on header rows.
 
-```markdown
+[[% set example_4 %]]
 | Name | Role |{.featured-row}
 | :---------------- | :--- |
 | Ana | Maintainer |
-```
+[[% endset %]]
+[[ table_example(example_4, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Name | Role |{.featured-row}
-| :---------------- | :--- |
-| Ana | Maintainer |
-</div>
-
-```html
-<thead>
-  <tr class="featured-row">
-    <th>Name</th>
-    <th>Role</th>
-  </tr>
-</thead>
-```
 
 ## Style a tbody section
 
@@ -179,7 +135,7 @@ With `multibody: true`, a standalone `{...}` line after a body section applies t
 that `<tbody>`. Because the final standalone attribute line is always table-level,
 the last body in this example gets its own class and the table gets one too.
 
-```markdown
+[[% set example_5 %]]
 | Category | Item |
 | :------- | :--- |
 | Fruit | Apple |
@@ -190,27 +146,9 @@ the last body in this example gets its own class and the table gets one too.
 | Vegetable | Onion |
 {.bg-color-orange}
 {.bg-color-primary}
-```
+[[% endset %]]
+[[ table_example(example_5, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Category | Item |
-| :------- | :--- |
-| Fruit | Apple |
-| Fruit | Banana |
-{.bg-color-green}
-
-| Vegetable | Carrot |
-| Vegetable | Onion |
-{.bg-color-orange}
-{.bg-color-primary}
-</div>
-
-```html
-<table class="bg-color-primary">
-    <tbody class="bg-color-green">...</tbody>
-    <tbody class="bg-color-orange">...</tbody>
-</table>
-```
 
 !!! tip "Requires multibody"
     Tbody attributes are only meaningful when `multibody: true` is enabled.
@@ -220,25 +158,15 @@ the last body in this example gets its own class and the table gets one too.
 The last standalone `{...}` line in the table block always targets the `<table>`
 element itself.
 
-```markdown
+[[% set example_6 %]]
 | Item | Stock |
 | :--- | ----: |
 | Notebook | 18 |
 | Pencil | 41 |
 {.bg-color-primary}
-```
+[[% endset %]]
+[[ table_example(example_6, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Item | Stock |
-| :--- | ----: |
-| Notebook | 18 |
-| Pencil | 41 |
-{.bg-color-primary}
-</div>
-
-```html
-<table class="bg-color-primary">...</table>
-```
 
 If you need attributes on both the last `<tbody>` and the `<table>`, use two
 consecutive lines at the end:
@@ -259,22 +187,13 @@ Attribute lists are preserved when other table features are active.
 
 Your class is appended to the built-in `extend` class.
 
-```markdown
+[[% set example_7 %]]
 | Name | Notes {.wrap} |
 | :--- | :----------------------+ |
 | Pencil | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua {.wrap} |
-```
+[[% endset %]]
+[[ table_example(example_7, result_class="result attr-list-demo") ]]
 
-<div class="result attr-list-demo" markdown="1">
-| Name | Notes {.wrap} |
-| :--- | :----------------------+ |
-| Pencil | Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua {.wrap} |
-</div>
-
-```html
-<th class="extend wrap">Notes</th>
-<td class="extend wrap">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</td>
-```
 
 ### Alignment, colspan, and rowspan
 
